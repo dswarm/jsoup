@@ -942,7 +942,7 @@ enum TokeniserState {
                     break;
                 case '&':
                     String ref = t.consumeCharacterReference('"', true);
-                    if (ref != null)
+                    if (ref != null && !ref.isEmpty())
                         t.tagPending.appendAttributeValue(ref);
                     else
                         t.tagPending.appendAttributeValue('&');
@@ -971,8 +971,8 @@ enum TokeniserState {
                     t.transition(AfterAttributeValue_quoted);
                     break;
                 case '&':
-                    String ref = t.consumeCharacterReference('\'', true);
-                    if (ref != null)
+                    String ref = t.consumeCharacterReference('"', true);
+                    if (ref != null && !ref.isEmpty())
                         t.tagPending.appendAttributeValue(ref);
                     else
                         t.tagPending.appendAttributeValue('&');
@@ -1005,8 +1005,8 @@ enum TokeniserState {
                     t.transition(BeforeAttributeName);
                     break;
                 case '&':
-                    String ref = t.consumeCharacterReference('>', true);
-                    if (ref != null)
+                    String ref = t.consumeCharacterReference('"', true);
+                    if (ref != null && !ref.isEmpty())
                         t.tagPending.appendAttributeValue(ref);
                     else
                         t.tagPending.appendAttributeValue('&');
