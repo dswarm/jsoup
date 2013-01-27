@@ -32,7 +32,7 @@ enum TokeniserState {
         // from & in data
         void read(Tokeniser t, CharacterReader r) {
             String c = t.consumeCharacterReference(null, false);
-            if (c == null || c.isEmpty())
+            if (c == null)
                 t.emit('&');
             else
                 t.emit(c);
@@ -67,7 +67,7 @@ enum TokeniserState {
     CharacterReferenceInRcdata {
         void read(Tokeniser t, CharacterReader r) {
             String c = t.consumeCharacterReference(null, false);
-            if (c == null || c.isEmpty())
+            if (c == null)
                 t.emit('&');
             else
                 t.emit(c);
@@ -941,8 +941,8 @@ enum TokeniserState {
                     t.transition(AfterAttributeValue_quoted);
                     break;
                 case '&':
-                    String ref = t.consumeCharacterReference('\'', true);
-                    if (ref != null && !ref.isEmpty())
+                    String ref = t.consumeCharacterReference('"', true);
+                    if (ref != null)
                         t.tagPending.appendAttributeValue(ref);
                     else
                         t.tagPending.appendAttributeValue('&');
@@ -972,7 +972,7 @@ enum TokeniserState {
                     break;
                 case '&':
                     String ref = t.consumeCharacterReference('\'', true);
-                    if (ref != null && !ref.isEmpty())
+                    if (ref != null)
                         t.tagPending.appendAttributeValue(ref);
                     else
                         t.tagPending.appendAttributeValue('&');
@@ -1006,7 +1006,7 @@ enum TokeniserState {
                     break;
                 case '&':
                     String ref = t.consumeCharacterReference('>', true);
-                    if (ref != null && !ref.isEmpty())
+                    if (ref != null)
                         t.tagPending.appendAttributeValue(ref);
                     else
                         t.tagPending.appendAttributeValue('&');

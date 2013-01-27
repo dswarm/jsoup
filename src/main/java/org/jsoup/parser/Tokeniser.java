@@ -74,6 +74,10 @@ class Tokeniser {
         charBuffer.append(str);
     }
 
+    void emit(char[] chars) {
+        charBuffer.append(chars);
+    }
+
     void emit(char c) {
         charBuffer.append(c);
     }
