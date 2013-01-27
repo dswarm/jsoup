@@ -32,7 +32,7 @@ enum TokeniserState {
         // from & in data
         void read(Tokeniser t, CharacterReader r) {
             String c = t.consumeCharacterReference(null, false);
-            if (c == null)
+            if (c == null || c.isEmpty())
                 t.emit('&');
             else
                 t.emit(c);
@@ -67,7 +67,7 @@ enum TokeniserState {
     CharacterReferenceInRcdata {
         void read(Tokeniser t, CharacterReader r) {
             String c = t.consumeCharacterReference(null, false);
-            if (c == null)
+            if (c == null || c.isEmpty())
                 t.emit('&');
             else
                 t.emit(c);
@@ -941,7 +941,7 @@ enum TokeniserState {
                     t.transition(AfterAttributeValue_quoted);
                     break;
                 case '&':
-                    String ref = t.consumeCharacterReference('"', true);
+                    String ref = t.consumeCharacterReference('\'', true);
                     if (ref != null && !ref.isEmpty())
                         t.tagPending.appendAttributeValue(ref);
                     else
@@ -971,7 +971,7 @@ enum TokeniserState {
                     t.transition(AfterAttributeValue_quoted);
                     break;
                 case '&':
-                    String ref = t.consumeCharacterReference('"', true);
+                    String ref = t.consumeCharacterReference('\'', true);
                     if (ref != null && !ref.isEmpty())
                         t.tagPending.appendAttributeValue(ref);
                     else
@@ -1005,7 +1005,7 @@ enum TokeniserState {
                     t.transition(BeforeAttributeName);
                     break;
                 case '&':
-                    String ref = t.consumeCharacterReference('"', true);
+                    String ref = t.consumeCharacterReference('>', true);
                     if (ref != null && !ref.isEmpty())
                         t.tagPending.appendAttributeValue(ref);
                     else
