@@ -327,6 +327,7 @@ public class HttpConnection implements Connection {
         private boolean ignoreHttpErrors = false;
         private boolean ignoreContentType = false;
         private Parser parser;
+//      always default to secure connections in https
         private boolean secure = true;
 
         private Request() {
@@ -566,7 +567,9 @@ public class HttpConnection implements Connection {
             conn.setReadTimeout(req.timeout());
             if (!req.isSecure()) {
                 initUnSecureSSL();
-                ( (HttpsURLConnection) conn ).setSSLSocketFactory(sslSocketFactory);
+                if (conn instanceof HttpsURLConnection) {
+                    ((HttpsURLConnection)conn).setSSLSocketFactory(sslSocketFactory);
+                }
             }
             if (req.method() == Method.POST)
                 conn.setDoOutput(true);
@@ -578,6 +581,12 @@ public class HttpConnection implements Connection {
             return conn;
         }
 
+        /**
+         * Initialise Trust manager that does not validate certificate chains and
+         * add it to current SSLContext.
+         *
+         * @throws IOException
+         */
         private static void initUnSecureSSL() throws IOException {
             if ( sslSocketFactory == null) {
                 // Create a trust manager that does not validate certificate chains
