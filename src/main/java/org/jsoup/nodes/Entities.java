@@ -1,15 +1,13 @@
 package org.jsoup.nodes;
 
+import org.jsoup.parser.Parser;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.CharsetEncoder;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.MissingResourceException;
-import java.util.Properties;
+import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.jsoup.parser.Parser;
 
 /**
  * HTML entities, and escape routines.
@@ -44,9 +42,7 @@ public class Entities {
     private static final Map<Character, String> baseByVal;
     private static final Map<Character, String> fullByVal;
     private static final Map<String, String> fullNameCache;
-    private static final Pattern unescapePattern = Pattern.compile("&(#(x|X)?([0-9a-fA-F]+)|[a-zA-Z]+\\d*);?");
-    private static final Pattern strictUnescapePattern = Pattern.compile("&(#(x|X)?([0-9a-fA-F]+)|[a-zA-Z]+\\d*);");
-
+    
     private Entities() {}
 
     /**
