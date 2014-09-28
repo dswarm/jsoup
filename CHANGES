@@ -38,6 +38,9 @@ jsoup changelog
  * Fixed an issue for Java 1.5 / Android 2.2 compatibility
    <https://github.com/jhy/jsoup/issues/375>
 
+ * Added Element.cssSelector(), which returns a unique CSS selector/path for an element.
+   <https://github.com/jhy/jsoup/pull/459>
+
 *** Release 1.7.3 [2013-Nov-10]
  * Introduced FormElement, providing easy access to form controls and their data, and the ability to submit forms
    with Jsoup.Connect.
