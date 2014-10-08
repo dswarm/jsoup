@@ -11,14 +11,13 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.*;
 
 /**
  Tests the URL connection. Not enabled by default, so tests don't require network connection.
@@ -280,6 +279,27 @@ public class UrlConnectTest {
         assertEquals(196577, mediumRes.parse().text().length());
         assertEquals(actualDocText, largeRes.parse().text().length());
         assertEquals(actualDocText, unlimitedRes.parse().text().length());
+    }
+
+    /**
+     * Verify that security disabling feature works properly.
+     *
+     * 1. try to hit url with invalid certificate and evaluate that exception is thrown
+     * 2. disable security checks and call the same url to verify that content is consumed correctly
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testUnsafe() throws Exception {
+        String url = "https://certs.cac.washington.edu/CAtest/";
+
+        try {
+            Jsoup.connect(url).execute();
+        } catch (IOException e) {
+//          that's expected exception
+        }
+        Connection.Response  defaultRes = Jsoup.connect(url).setValidateSSLCertificates(false).execute();
+        assertThat(defaultRes.statusCode(),is(200));
     }
 
     @Test
