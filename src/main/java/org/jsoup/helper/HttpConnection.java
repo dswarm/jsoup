@@ -7,7 +7,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.parser.Parser;
 import org.jsoup.parser.TokenQueue;
 
-import javax.net.ssl.*;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -15,9 +14,6 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -27,7 +23,6 @@ import java.util.zip.GZIPInputStream;
  * @see org.jsoup.Jsoup#connect(String)
  */
 public class HttpConnection implements Connection {
-    private static final int HTTP_TEMP_REDIR = 307; // http/1.1 temporary redirect, not in Java's set.
     public static final String  CONTENT_ENCODING = "Content-Encoding";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String MULTIPART_FORM_DATA = "multipart/form-data";
@@ -62,11 +57,6 @@ public class HttpConnection implements Connection {
 	private HttpConnection() {
         req = new Request();
         res = new Response();
-    }
-
-    public Connection setValidateSSLCertificates(boolean value) {
-        req.setValidateSSLCertificates(value);
-        return this;
     }
 
     public Connection url(URL url) {
@@ -351,10 +341,8 @@ public class HttpConnection implements Connection {
         private boolean ignoreHttpErrors = false;
         private boolean ignoreContentType = false;
         private Parser parser;
-//      always default to validateSSLCertificates connections in https
-        private boolean validateSSLCertificates = true;
 
-        private Request() {
+      	private Request() {
             timeoutMilliseconds = 3000;
             maxBodySizeBytes = 1024 * 1024; // 1MB
             followRedirects = true;
@@ -429,19 +417,11 @@ public class HttpConnection implements Connection {
         public Parser parser() {
             return parser;
         }
-
-        public boolean isValidateSSLCertificates() {
-            return validateSSLCertificates;
-        }
-
-        public void setValidateSSLCertificates(boolean value) {
-            validateSSLCertificates = value;
-        }
     }
 
     public static class Response extends HttpConnection.Base<Connection.Response> implements Connection.Response {
         private static final int MAX_REDIRECTS = 20;
-        private static SSLSocketFactory sslSocketFactory;
+        private static final String LOCATION = "Location";
         private int statusCode;
         private String statusMessage;
         private ByteBuffer byteData;
@@ -496,20 +476,16 @@ public class HttpConnection implements Connection {
                     writePost(req, conn.getOutputStream(), mimeBoundary);
 
                 int status = conn.getResponseCode();
-                boolean needsRedirect = false;
-                if (status != HttpURLConnection.HTTP_OK) {
-                    if (status == HttpURLConnection.HTTP_MOVED_TEMP || status == HttpURLConnection.HTTP_MOVED_PERM || status == HttpURLConnection.HTTP_SEE_OTHER || status == HTTP_TEMP_REDIR)
-                        needsRedirect = true;
-                    else if (!req.ignoreHttpErrors())
-                        throw new HttpStatusException("HTTP error fetching URL", status, req.url().toString());
-                }
                 res = new Response(previousResponse);
                 res.setupFromConnection(conn, previousResponse);
-                if (needsRedirect && req.followRedirects()) {
+                res.req = req;
+
+                // redirect if there's a location header (from 3xx, or 201 etc)
+                if (res.hasHeader(LOCATION) && req.followRedirects()) {
                     req.method(Method.GET); // always redirect with a get. any data param from original req are dropped.
                     req.data().clear();
 
-                    String location = res.header("Location");
+                    String location = res.header(LOCATION);
                     if (location != null && location.startsWith("http:/") && location.charAt(6) != '/') // fix broken Location: http:/temp/AAG_New/en/index.php
                         location = location.substring(6);
                     req.url(new URL(req.url(), encodeUrl(location)));
@@ -519,7 +495,8 @@ public class HttpConnection implements Connection {
                     }
                     return execute(req, res);
                 }
-                res.req = req;
+                if ((status < 200 || status >= 400) && !req.ignoreHttpErrors())
+                        throw new HttpStatusException("HTTP error fetching URL", status, req.url().toString());
 
                 // check that we can handle the returned content type; if not, abort before fetching it
                 String contentType = res.contentType();
@@ -600,20 +577,10 @@ public class HttpConnection implements Connection {
         // set up connection defaults, and details from request
         private static HttpURLConnection createConnection(Connection.Request req) throws IOException {
             HttpURLConnection conn = (HttpURLConnection) req.url().openConnection();
-
             conn.setRequestMethod(req.method().name());
             conn.setInstanceFollowRedirects(false); // don't rely on native redirection support
             conn.setConnectTimeout(req.timeout());
             conn.setReadTimeout(req.timeout());
-
-            if (conn instanceof HttpsURLConnection) {
-                if (!req.isValidateSSLCertificates()) {
-                    initUnSecureSSL();
-                    ((HttpsURLConnection)conn).setSSLSocketFactory(sslSocketFactory);
-                    ((HttpsURLConnection)conn).setHostnameVerifier(getInsecureVerifier());
-                }
-            }
-
             if (req.method() == Method.POST)
                 conn.setDoOutput(true);
             if (req.cookies().size() > 0)
@@ -622,63 +589,6 @@ public class HttpConnection implements Connection {
                 conn.addRequestProperty(header.getKey(), header.getValue());
             }
             return conn;
-        }
-
-        /**
-         * Instantiate Hostname Verifier that does nothing.
-         * This is used for connections with disabled SSL certificates validation.
-         *
-         *
-         * @return Hostname Verifier that does nothing and accepts all hostnames
-         */
-        private static HostnameVerifier getInsecureVerifier() {
-            HostnameVerifier hv = new HostnameVerifier() {
-                public boolean verify(String urlHostName, SSLSession session) {
-                    return true;
-                }
-            };
-            return hv;
-        }
-
-        /**
-         * Initialise Trust manager that does not validate certificate chains and
-         * add it to current SSLContext.
-         * <p/>
-         * please not that this method will only perform action if sslSocketFactory is not yet
-         * instantiated.
-         *
-         * @throws IOException
-         */
-        private static synchronized void initUnSecureSSL() throws IOException {
-            if (sslSocketFactory == null) {
-                // Create a trust manager that does not validate certificate chains
-                final TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
-
-                    public void checkClientTrusted(final X509Certificate[] chain, final String authType) {
-                    }
-
-                    public void checkServerTrusted(final X509Certificate[] chain, final String authType) {
-                    }
-
-                    public X509Certificate[] getAcceptedIssuers() {
-                        return null;
-                    }
-                }};
-
-                // Install the all-trusting trust manager
-                final SSLContext sslContext;
-                try {
-                    sslContext = SSLContext.getInstance("SSL");
-                    sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-                    // Create an ssl socket factory with our all-trusting manager
-                    sslSocketFactory = sslContext.getSocketFactory();
-                } catch (NoSuchAlgorithmException e) {
-                    throw new IOException("Can't create unsecure trust manager");
-                } catch (KeyManagementException e) {
-                    throw new IOException("Can't create unsecure trust manager");
-                }
-            }
-
         }
 
         // set up url, method, header, cookies
@@ -717,7 +627,7 @@ public class HttpConnection implements Connection {
                         String cookieVal = cd.consumeTo(";").trim();
                         if (cookieVal == null)
                             cookieVal = "";
-                        // ignores path, date, domain, validateSSLCertificates et al. req'd?
+                        // ignores path, date, domain, secure et al. req'd?
                         // name not blank, value not null
                         if (cookieName != null && cookieName.length() > 0)
                             cookie(cookieName, cookieVal);
