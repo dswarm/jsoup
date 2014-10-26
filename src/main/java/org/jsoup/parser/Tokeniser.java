@@ -3,12 +3,19 @@ package org.jsoup.parser;
 import org.jsoup.helper.Validate;
 import org.jsoup.nodes.Entities;
 
+import java.util.Arrays;
+
 /**
  * Readers the input stream into tokens.
  */
 class Tokeniser {
     static final char replacementChar = '\uFFFD'; // replaces null character
     static final String replacementString = new String(new char[]{replacementChar});
+	private static final char[] notCharRefCharsSorted = new char[]{'\t', '\n', '\r', '\f', ' ', '<', '&'};
+
+    static {
+        Arrays.sort(notCharRefCharsSorted);
+    }
 
     private CharacterReader reader; // html input
     private ParseErrorList errors; // errors found while tokenising
@@ -104,7 +111,7 @@ class Tokeniser {
             return null;
         if (additionalAllowedCharacter != null && additionalAllowedCharacter == reader.current())
             return null;
-        if (reader.matchesAny('\t', '\n', '\r', '\f', ' ', '<', '&'))
+        if (reader.matchesAnySorted(notCharRefCharsSorted))
             return null;
 
         reader.mark();
@@ -130,7 +137,7 @@ class Tokeniser {
             } else {
                 // todo: implement number replacement table
                 // todo: check for extra illegal unicode points as parse errors
-                return new String(new int[]{charval}, 0, 1);
+                return new String(Character.toChars(charval));
             }
         } else { // named
             // get as many letters as possible, and look for matching entities.
@@ -237,7 +244,7 @@ class Tokeniser {
             if (reader.matches('&')) {
                 reader.consume();
                 String c = consumeCharacterReference(null, inAttribute);
-                if (c == null)
+                if (c == null || c.isEmpty())
                     builder.append('&');
                 else
                     builder.append(c);
