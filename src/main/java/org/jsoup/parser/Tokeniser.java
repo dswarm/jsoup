@@ -11,7 +11,7 @@ import java.util.Arrays;
  */
 final class Tokeniser {
     static final char replacementChar = '\uFFFD'; // replaces null character
-    static final String replacementString = new String(new char[]{replacementChar});
+	static final String replacementString = new String(new char[]{replacementChar});    
 	private static final char[] notCharRefCharsSorted = new char[]{'\t', '\n', '\r', '\f', ' ', '<', '&'};
 
     static {
@@ -124,6 +124,7 @@ final class Tokeniser {
         selfClosingFlagAcknowledged = true;
     }
 
+	final private char[] charRefHolder = new char[1]; // holder to not have to keep creating arrays
     String consumeCharacterReference(Character additionalAllowedCharacter, boolean inAttribute) {
         if (reader.isEmpty())
             return null;
@@ -132,6 +133,7 @@ final class Tokeniser {
         if (reader.matchesAnySorted(notCharRefCharsSorted))
             return null;
 
+        final char[] charRef = charRefHolder;
         reader.mark();
         if (reader.matchConsume("#")) { // numbered
             boolean isHexMode = reader.matchConsumeIgnoreCase("X");
@@ -151,11 +153,16 @@ final class Tokeniser {
             } // skip
             if (charval == -1 || (charval >= 0xD800 && charval <= 0xDFFF) || charval > 0x10FFFF) {
                 characterReferenceError("character outside of valid range");
-                return replacementString;
+                charRef[0] = replacementChar;
+                return new String(charRef);
             } else {
                 // todo: implement number replacement table
                 // todo: check for extra illegal unicode points as parse errors
-                return new String(Character.toChars(charval));
+				if (charval < Character.MIN_SUPPLEMENTARY_CODE_POINT) {
+                    charRef[0] = (char) charval;
+                    return new String(charRef);
+                } else                
+					return new String(Character.toChars(charval));
             }
         } else { // named
             // get as many letters as possible, and look for matching entities.
@@ -177,7 +184,8 @@ final class Tokeniser {
             }
             if (!reader.matchConsume(";"))
                 characterReferenceError("missing semicolon"); // missing semi
-            return Entities.getCharacterByName(nameRef);
+            charRef[0] = Entities.getCharacterByName(nameRef);
+            return new String(charRef);
         }
     }
 
