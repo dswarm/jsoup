@@ -68,7 +68,7 @@ public class Entities {
     /**
      * Get the Character value of the named entity
      * @param name named entity (e.g. "lt" or "amp")
-     * @return the Character value of the named entity (e.g. '<' or '&')
+     * @return the Character value of the named entity (e.g. '{@literal <}' or '{@literal &}')
      */
     public static String getCharacterByName(String name) {
         return fullNameCache.get(name);
