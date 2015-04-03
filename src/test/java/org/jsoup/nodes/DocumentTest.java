@@ -150,6 +150,17 @@ public class DocumentTest {
         Document doc = Jsoup.parse(builder.toString());
         doc.clone();
     }
+
+	@Test public void DocumentsWithSameContentAreEqual() throws Exception {
+        Document docA = Jsoup.parse("<div/>One");
+        Document docB = Jsoup.parse("<div/>One");
+        Document docC = Jsoup.parse("<div/>Two");
+
+        assertEquals(docA, docB);
+        assertFalse(docA.equals(docC));
+        assertEquals(docA.hashCode(), docB.hashCode());
+        assertFalse(docA.hashCode() == docC.hashCode());
+    }
     
     @Test
     public void testMetaCharsetUpdateUtf8() {
