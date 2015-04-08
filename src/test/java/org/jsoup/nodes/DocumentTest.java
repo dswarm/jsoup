@@ -3,15 +3,13 @@ package org.jsoup.nodes;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-
 import org.jsoup.Jsoup;
 import org.jsoup.TextUtil;
 import org.jsoup.integration.ParseTest;
-import org.junit.Test;
-import org.junit.Ignore;
-
-import static org.jsoup.nodes.Document.OutputSettings.Syntax;
+import org.jsoup.nodes.Document.OutputSettings.Syntax;
 import static org.junit.Assert.*;
+import org.junit.Ignore;
+import org.junit.Test;
 
 /**
  Tests for Document.
@@ -151,7 +149,7 @@ public class DocumentTest {
         doc.clone();
     }
 
-	@Test public void DocumentsWithSameContentAreEqual() throws Exception {
+    @Test public void DocumentsWithSameContentAreEqual() throws Exception {
         Document docA = Jsoup.parse("<div/>One");
         Document docB = Jsoup.parse("<div/>One");
         Document docC = Jsoup.parse("<div/>Two");
@@ -254,15 +252,13 @@ public class DocumentTest {
     }
     
     @Test
-    public void testMetaCharsetUpdateDisabledNoChangesAfterUpdate() {
+    public void testMetaCharsetUpdateEnabledAfterCharsetChange() {
         final Document doc = createHtmlDocument("dontTouch");
         doc.charset(Charset.forName(charsetUtf8));
         
         Element selectedElement = doc.select("meta[charset]").first();
-        assertEquals("dontTouch", selectedElement.attr("charset"));
-        
-        selectedElement = doc.select("meta[name=charset]").first();
-        assertEquals("dontTouch", selectedElement.attr("content"));
+        assertEquals(charsetUtf8, selectedElement.attr("charset"));
+        assertTrue(doc.select("meta[name=charset]").isEmpty());
     }
             
     @Test
