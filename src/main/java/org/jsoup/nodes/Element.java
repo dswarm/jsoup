@@ -586,7 +586,7 @@ public class Element extends Node {
 
         for (int i = 0; i < elements.size(); i++) {
             E element = elements.get(i);
-            if (element.equals(search))
+            if (element == search)
                 return i;
         }
         return null;
