@@ -183,7 +183,7 @@ final class Tokeniser {
             }
             if (!reader.matchConsume(";"))
                 characterReferenceError("missing semicolon"); // missing semi
-            charRef[0] = Entities.getCharacterByName(nameRef);
+            charRef[0] = Entities.getCharacterByName(nameRef).charAt(0);
             return new String(charRef);
         }
     }

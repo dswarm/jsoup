@@ -613,7 +613,7 @@ public class Element extends Node {
         Validate.notEmpty(tagName);
         tagName = tagName.toLowerCase().trim();
 
-        return Collector.collect(new Evaluator.Tag(tagName), this);
+        return Collector.collect(new org.jsoup.select.Evaluator.Tag(tagName), this);
     }
 
     /**
@@ -628,7 +628,7 @@ public class Element extends Node {
     public Element getElementById(String id) {
         Validate.notEmpty(id);
         
-        Elements elements = Collector.collect(new Evaluator.Id(id), this);
+        Elements elements = Collector.collect(new org.jsoup.select.Evaluator.Id(id), this);
         if (elements.size() > 0)
             return elements.get(0);
         else
@@ -649,7 +649,7 @@ public class Element extends Node {
     public Elements getElementsByClass(String className) {
         Validate.notEmpty(className);
 
-        return Collector.collect(new Evaluator.Class(className), this);
+        return Collector.collect(new org.jsoup.select.Evaluator.Class(className), this);
     }
 
     /**
@@ -662,7 +662,7 @@ public class Element extends Node {
         Validate.notEmpty(key);
         key = key.trim().toLowerCase();
 
-        return Collector.collect(new Evaluator.Attribute(key), this);
+        return Collector.collect(new org.jsoup.select.Evaluator.Attribute(key), this);
     }
 
     /**
@@ -675,7 +675,7 @@ public class Element extends Node {
         Validate.notEmpty(keyPrefix);
         keyPrefix = keyPrefix.trim().toLowerCase();
 
-        return Collector.collect(new Evaluator.AttributeStarting(keyPrefix), this);
+        return Collector.collect(new org.jsoup.select.Evaluator.AttributeStarting(keyPrefix), this);
     }
 
     /**
@@ -686,7 +686,7 @@ public class Element extends Node {
      * @return elements that have this attribute with this value, empty if none
      */
     public Elements getElementsByAttributeValue(String key, String value) {
-        return Collector.collect(new Evaluator.AttributeWithValue(key, value), this);
+        return Collector.collect(new org.jsoup.select.Evaluator.AttributeWithValue(key, value), this);
     }
 
     /**
@@ -697,7 +697,7 @@ public class Element extends Node {
      * @return elements that do not have a matching attribute
      */
     public Elements getElementsByAttributeValueNot(String key, String value) {
-        return Collector.collect(new Evaluator.AttributeWithValueNot(key, value), this);
+        return Collector.collect(new org.jsoup.select.Evaluator.AttributeWithValueNot(key, value), this);
     }
 
     /**
@@ -708,7 +708,7 @@ public class Element extends Node {
      * @return elements that have attributes that start with the value prefix
      */
     public Elements getElementsByAttributeValueStarting(String key, String valuePrefix) {
-        return Collector.collect(new Evaluator.AttributeWithValueStarting(key, valuePrefix), this);
+        return Collector.collect(new org.jsoup.select.Evaluator.AttributeWithValueStarting(key, valuePrefix), this);
     }
 
     /**
@@ -719,7 +719,7 @@ public class Element extends Node {
      * @return elements that have attributes that end with the value suffix
      */
     public Elements getElementsByAttributeValueEnding(String key, String valueSuffix) {
-        return Collector.collect(new Evaluator.AttributeWithValueEnding(key, valueSuffix), this);
+        return Collector.collect(new org.jsoup.select.Evaluator.AttributeWithValueEnding(key, valueSuffix), this);
     }
 
     /**
@@ -730,7 +730,7 @@ public class Element extends Node {
      * @return elements that have attributes containing this text
      */
     public Elements getElementsByAttributeValueContaining(String key, String match) {
-        return Collector.collect(new Evaluator.AttributeWithValueContaining(key, match), this);
+        return Collector.collect(new org.jsoup.select.Evaluator.AttributeWithValueContaining(key, match), this);
     }
     
     /**
@@ -740,7 +740,7 @@ public class Element extends Node {
      * @return elements that have attributes matching this regular expression
      */
     public Elements getElementsByAttributeValueMatching(String key, Pattern pattern) {
-        return Collector.collect(new Evaluator.AttributeWithValueMatching(key, pattern), this);
+        return Collector.collect(new org.jsoup.select.Evaluator.AttributeWithValueMatching(key, pattern), this);
         
     }
     
@@ -766,7 +766,7 @@ public class Element extends Node {
      * @return elements less than index
      */
     public Elements getElementsByIndexLessThan(int index) {
-        return Collector.collect(new Evaluator.IndexLessThan(index), this);
+        return Collector.collect(new org.jsoup.select.Evaluator.IndexLessThan(index), this);
     }
     
     /**
@@ -775,7 +775,7 @@ public class Element extends Node {
      * @return elements greater than index
      */
     public Elements getElementsByIndexGreaterThan(int index) {
-        return Collector.collect(new Evaluator.IndexGreaterThan(index), this);
+        return Collector.collect(new org.jsoup.select.Evaluator.IndexGreaterThan(index), this);
     }
     
     /**
@@ -784,7 +784,7 @@ public class Element extends Node {
      * @return elements equal to index
      */
     public Elements getElementsByIndexEquals(int index) {
-        return Collector.collect(new Evaluator.IndexEquals(index), this);
+        return Collector.collect(new org.jsoup.select.Evaluator.IndexEquals(index), this);
     }
     
     /**
@@ -795,7 +795,7 @@ public class Element extends Node {
      * @see Element#text()
      */
     public Elements getElementsContainingText(String searchText) {
-        return Collector.collect(new Evaluator.ContainsText(searchText), this);
+        return Collector.collect(new org.jsoup.select.Evaluator.ContainsText(searchText), this);
     }
     
     /**
@@ -806,7 +806,7 @@ public class Element extends Node {
      * @see Element#ownText()
      */
     public Elements getElementsContainingOwnText(String searchText) {
-        return Collector.collect(new Evaluator.ContainsOwnText(searchText), this);
+        return Collector.collect(new org.jsoup.select.Evaluator.ContainsOwnText(searchText), this);
     }
     
     /**
@@ -816,7 +816,7 @@ public class Element extends Node {
      * @see Element#text()
      */
     public Elements getElementsMatchingText(Pattern pattern) {
-        return Collector.collect(new Evaluator.Matches(pattern), this);
+        return Collector.collect(new org.jsoup.select.Evaluator.Matches(pattern), this);
     }
     
     /**
@@ -842,7 +842,7 @@ public class Element extends Node {
      * @see Element#ownText()
      */
     public Elements getElementsMatchingOwnText(Pattern pattern) {
-        return Collector.collect(new Evaluator.MatchesOwn(pattern), this);
+        return Collector.collect(new org.jsoup.select.Evaluator.MatchesOwn(pattern), this);
     }
     
     /**
@@ -867,7 +867,7 @@ public class Element extends Node {
      * @return all elements
      */
     public Elements getAllElements() {
-        return Collector.collect(new Evaluator.AllElements(), this);
+        return Collector.collect(new org.jsoup.select.Evaluator.AllElements(), this);
     }
 
     /**

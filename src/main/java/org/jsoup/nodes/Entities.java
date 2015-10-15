@@ -40,6 +40,7 @@ public class Entities {
     private static final Map<String, Character> base;
     private static final Map<Character, String> baseByVal;
     private static final Map<Character, String> fullByVal;
+    private static final Map<String, String> fullNameCache;
 
     private Entities() {}
 
